@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState,useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Bell, LogOut, Settings, User, Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import toast from 'react-hot-toast';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,11 +16,46 @@ const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-
+  const [profile, setProfile] = useState({
+    fullName: '',
+    email: '',
+    title: '',
+    bio: '',
+    timezone: '',
+    language: 'en'
+  });
   const isActive = (path: string) => location.pathname === path;
+    useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const token = localStorage.getItem('token'); // or sessionStorage
+        const res = await fetch('http://localhost:8080/user/me', {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            'Authorization': `Bearer ${token}`,
+          },
+        });
 
+        if (!res.ok) throw new Error('Failed to fetch user');
+        const data = await res.json();
+
+        setProfile({
+          ...profile,
+          fullName: data.name,
+          email: data.email,
+        });
+      } catch (err) {
+        console.error(err);
+        toast.error('Failed to load profile');
+      }
+    };
+
+    fetchUser();
+  }, []);
   const handleLogout = () => {
     // Add logout logic here
+    localStorage.removeItem('token');
     navigate('/login');
   };
 
@@ -62,13 +98,7 @@ const Header = () => {
 
           {/* Right side - Desktop */}
           <div className="hidden md:flex items-center space-x-4">
-            {/* Notifications */}
-            <Button variant="ghost" size="icon" className="relative">
-              <Bell className="h-5 w-5" />
-              <span className="absolute -top-1 -right-1 h-4 w-4 bg-accent-pink rounded-full text-xs text-white flex items-center justify-center">
-                3
-              </span>
-            </Button>
+            
 
             {/* User Menu */}
             <DropdownMenu>
@@ -76,16 +106,16 @@ const Header = () => {
                 <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                   <Avatar className="h-8 w-8">
                     <AvatarImage src="/avatars/01.png" alt="User" />
-                    <AvatarFallback className="bg-gradient-primary text-white">JD</AvatarFallback>
+                    <AvatarFallback className="bg-gradient-primary text-white">{profile.fullName[0]}</AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-56" align="end" forceMount>
                 <div className="flex items-center justify-start gap-2 p-2">
                   <div className="flex flex-col space-y-1 leading-none">
-                    <p className="font-medium">John Doe</p>
+                    <p className="font-medium">{profile.fullName}</p>
                     <p className="w-[200px] truncate text-sm text-muted-foreground">
-                      john.doe@example.com
+                      {profile.email}
                     </p>
                   </div>
                 </div>

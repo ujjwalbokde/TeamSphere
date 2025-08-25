@@ -1,18 +1,31 @@
-import { useState } from 'react';
-import { Users, Plus, Search, Filter, MoreHorizontal, UserPlus, Settings, Star, FolderOpen, Palette, Mail, Upload } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
+import { useEffect, useState } from "react";
+import {
+  Users,
+  Plus,
+  Search,
+  Filter,
+  MoreHorizontal,
+  UserPlus,
+  Settings,
+  Star,
+  FolderOpen,
+  Palette,
+  Mail,
+  Upload,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from "@/components/ui/dropdown-menu";
 import {
   Dialog,
   DialogContent,
@@ -20,167 +33,199 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog';
-import Layout from '@/components/Layout/Layout';
-import toast from 'react-hot-toast';
-import { useNavigate } from 'react-router-dom';
+} from "@/components/ui/dialog";
+import Layout from "@/components/Layout/Layout";
+import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 const Teams = () => {
   const navigate = useNavigate();
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [newTeamName, setNewTeamName] = useState('');
-  const [newTeamDescription, setNewTeamDescription] = useState('');
-  const [newTeamColor, setNewTeamColor] = useState('bg-gradient-to-br from-blue-500 to-purple-500');
+  const [newTeamName, setNewTeamName] = useState("");
+  const [newTeamDescription, setNewTeamDescription] = useState("");
+  const [newTeamColor, setNewTeamColor] = useState(
+    "bg-gradient-to-br from-blue-500 to-purple-500"
+  );
   const [inviteEmails, setInviteEmails] = useState<string[]>([]);
-  const [currentEmail, setCurrentEmail] = useState('');
+  const [currentEmail, setCurrentEmail] = useState("");
+  const [teams, setTeams] = useState([]);
 
-  const teams = [
-    {
-      id: 1,
-      name: 'Design Team',
-      description: 'Creating beautiful and intuitive user experiences',
-      memberCount: 8,
-      projectCount: 12,
-      avatar: '/teams/design.png',
-      color: 'bg-gradient-to-br from-purple-500 to-pink-500',
-      members: [
-        { name: 'Alice', avatar: '/avatars/alice.png' },
-        { name: 'Bob', avatar: '/avatars/bob.png' },
-        { name: 'Carol', avatar: '/avatars/carol.png' }
-      ],
-      isStarred: true,
-      role: 'Admin'
-    },
-    {
-      id: 2,
-      name: 'Engineering',
-      description: 'Building robust and scalable solutions',
-      memberCount: 15,
-      projectCount: 8,
-      avatar: '/teams/engineering.png',
-      color: 'bg-gradient-to-br from-blue-500 to-cyan-500',
-      members: [
-        { name: 'David', avatar: '/avatars/david.png' },
-        { name: 'Eve', avatar: '/avatars/eve.png' },
-        { name: 'Frank', avatar: '/avatars/frank.png' }
-      ],
-      isStarred: false,
-      role: 'Member'
-    },
-    {
-      id: 3,
-      name: 'Marketing',
-      description: 'Driving growth and engagement',
-      memberCount: 6,
-      projectCount: 15,
-      avatar: '/teams/marketing.png',
-      color: 'bg-gradient-to-br from-orange-500 to-red-500',
-      members: [
-        { name: 'Grace', avatar: '/avatars/grace.png' },
-        { name: 'Henry', avatar: '/avatars/henry.png' }
-      ],
-      isStarred: true,
-      role: 'Member'
-    },
-    {
-      id: 4,
-      name: 'Product',
-      description: 'Defining product strategy and roadmap',
-      memberCount: 5,
-      projectCount: 6,
-      avatar: '/teams/product.png',
-      color: 'bg-gradient-to-br from-green-500 to-emerald-500',
-      members: [
-        { name: 'Ivy', avatar: '/avatars/ivy.png' },
-        { name: 'Jack', avatar: '/avatars/jack.png' }
-      ],
-      isStarred: false,
-      role: 'Admin'
-    },
-    {
-      id: 5,
-      name: 'Sales',
-      description: 'Building relationships and closing deals',
-      memberCount: 10,
-      projectCount: 20,
-      avatar: '/teams/sales.png',
-      color: 'bg-gradient-to-br from-indigo-500 to-purple-500',
-      members: [
-        { name: 'Kate', avatar: '/avatars/kate.png' },
-        { name: 'Liam', avatar: '/avatars/liam.png' },
-        { name: 'Mia', avatar: '/avatars/mia.png' }
-      ],
-      isStarred: false,
-      role: 'Member'
-    },
-    {
-      id: 6,
-      name: 'Support',
-      description: 'Helping customers succeed',
-      memberCount: 7,
-      projectCount: 5,
-      avatar: '/teams/support.png',
-      color: 'bg-gradient-to-br from-teal-500 to-blue-500',
-      members: [
-        { name: 'Noah', avatar: '/avatars/noah.png' },
-        { name: 'Olivia', avatar: '/avatars/olivia.png' }
-      ],
-      isStarred: true,
-      role: 'Member'
+  const fetchMyTeams = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("No token found, please login again.");
+      }
+
+      const res = await fetch("http://localhost:8080/api/teams/my-teams", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!res.ok) {
+        throw new Error(`Error: ${res.status}`);
+      }
+
+      const data = await res.json();
+      console.log("Raw My Teams:", data);
+
+      // ✅ Map backend keys to frontend shape
+      const mappedTeams = data.map((team) => ({
+        id: team.id,
+        name: team.teamName,
+        description: team.description || "No description provided",
+        color:
+          team.teamColor || "bg-gradient-to-br from-blue-500 to-purple-500",
+        members: team.members || [],
+        memberCount: team.members ? team.members.length : 0,
+        projectCount: team.projectCount || 0, // if backend doesn’t send this, default 0
+        role: team.role || "Member",
+        isStarred: team.isStarred || false,
+        createdBy: team.createdBy || "Unknown",
+      }));
+
+      setTeams(mappedTeams);
+    } catch (error) {
+      console.error("Failed to fetch teams:", error);
     }
-  ];
+  };
 
-  const filteredTeams = teams.filter(team =>
-    team.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    team.description.toLowerCase().includes(searchTerm.toLowerCase())
+  useEffect(() => {
+    fetchMyTeams();
+  }, []);
+  //error showing null.Lowercase
+
+  const filteredTeams = teams.filter(
+    (team) =>
+      (team && team.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (team &&
+        team.description.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
-  const handleCreateTeam = () => {
+  const handleCreateTeam = async () => {
     if (!newTeamName.trim()) {
-      toast.error('Please enter a team name');
+      toast.error("Please enter a team name");
       return;
     }
 
-    // Simulate team creation with invite emails
-    const emailCount = inviteEmails.length;
-    const successMessage = emailCount > 0 
-      ? `Team "${newTeamName}" created successfully! Invites sent to ${emailCount} ${emailCount === 1 ? 'person' : 'people'}.`
-      : `Team "${newTeamName}" created successfully!`;
-    
-    toast.success(successMessage);
-    setNewTeamName('');
-    setNewTeamDescription('');
-    setInviteEmails([]);
-    setCurrentEmail('');
-    setNewTeamColor('bg-gradient-to-br from-blue-500 to-purple-500');
-    setIsCreateDialogOpen(false);
+    try {
+      const token = localStorage.getItem("token"); // ✅ grab JWT
+      if (!token) {
+        toast.error("You must be logged in");
+        return;
+      }
+
+      const payload = {
+        teamName: newTeamName,
+        description: newTeamDescription,
+        teamColor: newTeamColor,
+        members: inviteEmails, // array of emails
+      };
+
+      const response = await fetch("http://localhost:8080/api/teams", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`, // ✅ send JWT
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || "Failed to create team");
+      }
+
+      const data = await response.json();
+      console.log("Team created:", data);
+
+      // ✅ success message
+      const emailCount = inviteEmails.length;
+      const successMessage =
+        emailCount > 0
+          ? `Team "${newTeamName}" created successfully! Invites sent to ${emailCount} ${
+              emailCount === 1 ? "person" : "people"
+            }.`
+          : `Team "${newTeamName}" created successfully!`;
+
+      toast.success(successMessage);
+
+      // reset fields
+      setNewTeamName("");
+      setNewTeamDescription("");
+      setInviteEmails([]);
+      setCurrentEmail("");
+      setNewTeamColor("bg-gradient-to-br from-blue-500 to-purple-500");
+      setIsCreateDialogOpen(false);
+    } catch (error) {
+      console.error("Error creating team:", error);
+      toast.error(error.message || "Something went wrong");
+    }
   };
+  const [userInfo, setUserInfo] = useState(null);
+  //call /me route for user info
+  const fetchUserInfo = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        toast.error("You must be logged in");
+        return;
+      }
+
+      const res = await fetch('http://localhost:8080/user/me', {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
+      if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(errorText || "Failed to fetch user info");
+      }
+
+      const data = await res.json();
+      console.log("User info:", data);
+      setUserInfo(data);
+    } catch (error) {
+      console.error("Error fetching user info:", error);
+      toast.error(error.message || "Something went wrong");
+    }
+  };
+  useEffect(() => {
+    fetchUserInfo();
+  }, []);
 
   const handleAddEmail = () => {
     if (!currentEmail.trim()) return;
-    
+
     if (!/\S+@\S+\.\S+/.test(currentEmail)) {
-      toast.error('Please enter a valid email address');
+      toast.error("Please enter a valid email address");
       return;
     }
-    
+
     if (inviteEmails.includes(currentEmail)) {
-      toast.error('Email already added');
+      toast.error("Email already added");
       return;
     }
-    
+
     setInviteEmails([...inviteEmails, currentEmail]);
-    setCurrentEmail('');
-    toast.success('Email added to invite list');
+    setCurrentEmail("");
+    toast.success("Email added to invite list");
   };
 
   const handleRemoveEmail = (emailToRemove: string) => {
-    setInviteEmails(inviteEmails.filter(email => email !== emailToRemove));
-    toast.success('Email removed from invite list');
+    setInviteEmails(inviteEmails.filter((email) => email !== emailToRemove));
+    toast.success("Email removed from invite list");
   };
 
-  const handleViewTeam = (teamId: number, teamName: string) => {
+  const handleViewTeam = (teamId: string) => {
+
     navigate(`/teams/${teamId}`);
   };
 
@@ -188,7 +233,11 @@ const Teams = () => {
     toast.success(`Joined ${teamName} successfully!`);
   };
 
-  const handleStarTeam = (teamId: number, teamName: string, isStarred: boolean) => {
+  const handleStarTeam = (
+    teamId: number,
+    teamName: string,
+    isStarred: boolean
+  ) => {
     if (isStarred) {
       toast.success(`Removed ${teamName} from favorites`);
     } else {
@@ -209,8 +258,11 @@ const Teams = () => {
               Collaborate with your teams and manage projects together
             </p>
           </div>
-          
-          <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+
+          <Dialog
+            open={isCreateDialogOpen}
+            onOpenChange={setIsCreateDialogOpen}
+          >
             <DialogTrigger asChild>
               <Button className="btn-gradient mt-4 sm:mt-0">
                 <Plus className="h-4 w-4 mr-2" />
@@ -219,14 +271,20 @@ const Teams = () => {
             </DialogTrigger>
             <DialogContent className="glass-card">
               <DialogHeader>
-                <DialogTitle className="text-2xl font-poppins font-bold">Create New Team</DialogTitle>
+                <DialogTitle className="text-2xl font-poppins font-bold">
+                  Create New Team
+                </DialogTitle>
                 <DialogDescription>
-                  Start collaborating with a new team. You can invite members immediately.
+                  Start collaborating with a new team. You can invite members
+                  immediately.
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-6 mt-6">
                 <div>
-                  <Label htmlFor="teamName" className="text-sm font-medium text-gray-700">
+                  <Label
+                    htmlFor="teamName"
+                    className="text-sm font-medium text-gray-700"
+                  >
                     Team Name *
                   </Label>
                   <Input
@@ -237,9 +295,12 @@ const Teams = () => {
                     className="mt-2"
                   />
                 </div>
-                
+
                 <div>
-                  <Label htmlFor="teamDescription" className="text-sm font-medium text-gray-700">
+                  <Label
+                    htmlFor="teamDescription"
+                    className="text-sm font-medium text-gray-700"
+                  >
                     Description
                   </Label>
                   <Textarea
@@ -259,21 +320,23 @@ const Teams = () => {
                   </Label>
                   <div className="grid grid-cols-4 gap-3">
                     {[
-                      'bg-gradient-to-br from-blue-500 to-purple-500',
-                      'bg-gradient-to-br from-purple-500 to-pink-500',
-                      'bg-gradient-to-br from-orange-500 to-red-500',
-                      'bg-gradient-to-br from-green-500 to-emerald-500',
-                      'bg-gradient-to-br from-cyan-500 to-blue-500',
-                      'bg-gradient-to-br from-indigo-500 to-purple-500',
-                      'bg-gradient-to-br from-teal-500 to-cyan-500',
-                      'bg-gradient-to-br from-rose-500 to-pink-500'
+                      "bg-gradient-to-br from-blue-500 to-purple-500",
+                      "bg-gradient-to-br from-purple-500 to-pink-500",
+                      "bg-gradient-to-br from-orange-500 to-red-500",
+                      "bg-gradient-to-br from-green-500 to-emerald-500",
+                      "bg-gradient-to-br from-cyan-500 to-blue-500",
+                      "bg-gradient-to-br from-indigo-500 to-purple-500",
+                      "bg-gradient-to-br from-teal-500 to-cyan-500",
+                      "bg-gradient-to-br from-rose-500 to-pink-500",
                     ].map((color) => (
                       <button
                         key={color}
                         type="button"
                         onClick={() => setNewTeamColor(color)}
                         className={`w-12 h-12 rounded-lg ${color} ring-2 ring-offset-2 transition-all ${
-                          newTeamColor === color ? 'ring-primary' : 'ring-transparent'
+                          newTeamColor === color
+                            ? "ring-primary"
+                            : "ring-transparent"
                         } hover:scale-105`}
                       />
                     ))}
@@ -291,10 +354,12 @@ const Teams = () => {
                         placeholder="Enter email address"
                         value={currentEmail}
                         onChange={(e) => setCurrentEmail(e.target.value)}
-                        onKeyPress={(e) => e.key === 'Enter' && handleAddEmail()}
+                        onKeyPress={(e) =>
+                          e.key === "Enter" && handleAddEmail()
+                        }
                         className="flex-1"
                       />
-                      <Button 
+                      <Button
                         type="button"
                         onClick={handleAddEmail}
                         variant="outline"
@@ -303,13 +368,18 @@ const Teams = () => {
                         Add
                       </Button>
                     </div>
-                    
+
                     {inviteEmails.length > 0 && (
                       <div className="max-h-24 overflow-y-auto">
                         <div className="space-y-2">
                           {inviteEmails.map((email, index) => (
-                            <div key={index} className="flex items-center justify-between bg-gray-50 rounded-lg px-3 py-2">
-                              <span className="text-sm text-gray-700">{email}</span>
+                            <div
+                              key={index}
+                              className="flex items-center justify-between bg-gray-50 rounded-lg px-3 py-2"
+                            >
+                              <span className="text-sm text-gray-700">
+                                {email}
+                              </span>
                               <Button
                                 type="button"
                                 variant="ghost"
@@ -324,22 +394,24 @@ const Teams = () => {
                         </div>
                       </div>
                     )}
-                    
+
                     <p className="text-xs text-gray-500">
-                      {inviteEmails.length === 0 ? 'Add emails one by one' : `${inviteEmails.length} email(s) added`}
+                      {inviteEmails.length === 0
+                        ? "Add emails one by one"
+                        : `${inviteEmails.length} email(s) added`}
                     </p>
                   </div>
                 </div>
 
                 <div className="flex space-x-3 pt-4">
-                  <Button 
-                    onClick={handleCreateTeam} 
+                  <Button
+                    onClick={handleCreateTeam}
                     className="btn-gradient flex-1"
                   >
                     Create Team
                   </Button>
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     onClick={() => setIsCreateDialogOpen(false)}
                     className="flex-1"
                   >
@@ -371,11 +443,16 @@ const Teams = () => {
         {/* Teams Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredTeams.map((team) => (
-            <Card key={team.id} className="glass-card border-white/20 hover:scale-105 transition-all duration-300 group">
+            <Card
+              key={team.id}
+              className="glass-card border-white/20 hover:scale-105 transition-all duration-300 group"
+            >
               <CardHeader className="pb-4">
                 <div className="flex items-start justify-between">
                   <div className="flex items-center space-x-3">
-                    <div className={`w-12 h-12 rounded-lg ${team.color} flex items-center justify-center text-white font-bold text-lg`}>
+                    <div
+                      className={`w-12 h-12 rounded-lg ${team.color} flex items-center justify-center text-white font-bold text-lg`}
+                    >
                       {team.name.charAt(0)}
                     </div>
                     <div>
@@ -383,21 +460,31 @@ const Teams = () => {
                         {team.name}
                       </CardTitle>
                       <Badge variant="outline" className="text-xs mt-1">
-                        {team.role}
+                        {/* {userInfo.email && <span>{userInfo.email}</span>}
+                        {team.createdBy && <span>{team.createdBy}</span>} */}
+                        {userInfo && userInfo.email === team.createdBy ? "Admin" : "Member"}
                       </Badge>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center space-x-2">
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => handleStarTeam(team.id, team.name, team.isStarred)}
-                      className={team.isStarred ? 'text-yellow-500' : 'text-gray-400'}
+                      onClick={() =>
+                        handleStarTeam(team.id, team.name, team.isStarred)
+                      }
+                      className={
+                        team.isStarred ? "text-yellow-500" : "text-gray-400"
+                      }
                     >
-                      <Star className={`h-4 w-4 ${team.isStarred ? 'fill-current' : ''}`} />
+                      <Star
+                        className={`h-4 w-4 ${
+                          team.isStarred ? "fill-current" : ""
+                        }`}
+                      />
                     </Button>
-                    
+
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="icon">
@@ -418,12 +505,12 @@ const Teams = () => {
                   </div>
                 </div>
               </CardHeader>
-              
+
               <CardContent className="space-y-4">
                 <p className="text-gray-600 text-sm leading-relaxed">
                   {team.description}
                 </p>
-                
+
                 <div className="flex items-center justify-between text-sm text-gray-500">
                   <div className="flex items-center space-x-4">
                     <span className="flex items-center">
@@ -436,27 +523,34 @@ const Teams = () => {
                     </span>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center justify-between">
                   <div className="flex -space-x-2">
-                    {team.members.slice(0, 3).map((member, idx) => (
-                      <Avatar key={idx} className="h-8 w-8 border-2 border-white">
-                        <AvatarFallback className="bg-gradient-primary text-white text-xs">
-                          {member.name.slice(0, 2)}
-                        </AvatarFallback>
-                      </Avatar>
-                    ))}
-                    {team.memberCount > 3 && (
+                    {team.members
+                      .slice(0, 3)
+                      .map((member: string, idx: number) => (
+                        <Avatar
+                          key={idx}
+                          className="h-8 w-8 border-2 border-white"
+                        >
+                          <AvatarFallback className="bg-gradient-primary text-white text-xs">
+                            {member ? member.slice(0, 1).toUpperCase() : "??"}
+                          </AvatarFallback>
+                        </Avatar>
+                      ))}
+                    {team.members.length > 3 && (
                       <div className="h-8 w-8 rounded-full bg-gray-100 border-2 border-white flex items-center justify-center">
-                        <span className="text-xs text-gray-600">+{team.memberCount - 3}</span>
+                        <span className="text-xs text-gray-600">
+                          +{team.members.length - 3}
+                        </span>
                       </div>
                     )}
                   </div>
-                  
+
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => handleViewTeam(team.id, team.name)}
+                    onClick={() => handleViewTeam(team.id)}
                     className="hover:bg-primary hover:text-white transition-colors"
                   >
                     View Team
@@ -477,10 +571,12 @@ const Teams = () => {
               No teams found
             </h3>
             <p className="text-gray-600 mb-6">
-              {searchTerm ? 'Try adjusting your search terms' : 'Get started by creating your first team'}
+              {searchTerm
+                ? "Try adjusting your search terms"
+                : "Get started by creating your first team"}
             </p>
             {!searchTerm && (
-              <Button 
+              <Button
                 onClick={() => setIsCreateDialogOpen(true)}
                 className="btn-gradient"
               >

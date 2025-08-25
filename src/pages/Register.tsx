@@ -11,7 +11,7 @@ const Register = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
-    fullName: '',
+    name: '',
     email: '',
     password: '',
     confirmPassword: '',
@@ -19,43 +19,59 @@ const Register = () => {
   });
   const navigate = useNavigate();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setIsLoading(true);
 
-    try {
-      // Validation
-      if (!formData.fullName || !formData.email || !formData.password || !formData.confirmPassword) {
-        toast.error('Please fill in all fields');
-        return;
-      }
-
-      if (formData.password !== formData.confirmPassword) {
-        toast.error('Passwords do not match');
-        return;
-      }
-
-      if (formData.password.length < 8) {
-        toast.error('Password must be at least 8 characters long');
-        return;
-      }
-
-      if (!formData.agreeToTerms) {
-        toast.error('Please agree to the Terms of Service');
-        return;
-      }
-
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      toast.success('Account created successfully! Welcome to TeamSphere!');
-      navigate('/dashboard');
-    } catch (error) {
-      toast.error('Something went wrong. Please try again.');
-    } finally {
-      setIsLoading(false);
+  try {
+    // Validation
+    if (!formData.name || !formData.email || !formData.password || !formData.confirmPassword) {
+      toast.error('Please fill in all fields');
+      return;
     }
-  };
+
+    if (formData.password !== formData.confirmPassword) {
+      toast.error('Passwords do not match');
+      return;
+    }
+
+    if (formData.password.length < 6) {
+      toast.error('Password must be at least 8 characters long');
+      return;
+    }
+
+    if (!formData.agreeToTerms) {
+      toast.error('Please agree to the Terms of Service');
+      return;
+    }
+    // 🔥 Actual API call
+    const response = await fetch(`http://localhost:8080/api/auth/register`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+      }),
+    });
+    
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Registration failed');
+    }
+
+    toast.success('Account created successfully! Welcome to TeamSphere!');
+    navigate('/login');
+  } catch (error) {
+    toast.error(error.message || 'Something went wrong. Please try again.');
+  } finally {
+    setIsLoading(false);
+  }
+};
+
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -104,9 +120,9 @@ const Register = () => {
               <User className="icon" size={20} />
               <Input
                 type="text"
-                name="fullName"
+                name="name"
                 placeholder="Enter your full name"
-                value={formData.fullName}
+                value={formData.name}
                 onChange={handleInputChange}
                 required
                 aria-label="Full name"
@@ -138,7 +154,7 @@ const Register = () => {
                 onChange={handleInputChange}
                 required
                 aria-label="Password"
-                minLength={8}
+                minLength={6}
               />
               <button
                 type="button"
@@ -161,7 +177,7 @@ const Register = () => {
                 onChange={handleInputChange}
                 required
                 aria-label="Confirm password"
-                minLength={8}
+                minLength={6}
               />
               <button
                 type="button"
@@ -174,7 +190,7 @@ const Register = () => {
             </div>
 
             {/* Password Requirements */}
-            <div className="text-sm text-gray-600 space-y-1">
+            {/* <div className="text-sm text-gray-600 space-y-1">
               <p>Password must contain:</p>
               <ul className="list-disc list-inside space-y-1 text-xs">
                 <li className={formData.password.length >= 8 ? 'text-green-600' : ''}>
@@ -187,7 +203,7 @@ const Register = () => {
                   One number
                 </li>
               </ul>
-            </div>
+            </div> */}
 
             {/* Terms Agreement */}
             <div className="flex items-start space-x-2">
@@ -233,16 +249,16 @@ const Register = () => {
           </form>
 
           {/* Social Login */}
-          <div className="relative">
+          {/* <div className="relative">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-gray-300"></div>
             </div>
             <div className="relative flex justify-center text-sm">
               <span className="px-2 bg-white text-gray-500">Or continue with</span>
             </div>
-          </div>
+          </div> */}
 
-          <div className="grid grid-cols-2 gap-3">
+          {/* <div className="grid grid-cols-2 gap-3">
             <Button variant="outline" className="w-full py-3">
               <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
                 <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -258,7 +274,7 @@ const Register = () => {
               </svg>
               Facebook
             </Button>
-          </div>
+          </div> */}
 
           {/* Sign In Link */}
           <div className="text-center">

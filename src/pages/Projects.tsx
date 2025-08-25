@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState,useEffect } from 'react';
 import { FolderOpen, Plus, Search, Filter, Calendar, Users, MoreHorizontal, Star, Clock, CalendarDays, Flag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -49,128 +49,232 @@ const Projects = () => {
   const [endDate, setEndDate] = useState('');
   const [priority, setPriority] = useState('');
 
-  const teams = [
-    { id: 1, name: 'Design Team' },
-    { id: 2, name: 'Engineering' },
-    { id: 3, name: 'Marketing' },
-    { id: 4, name: 'Product' },
-    { id: 5, name: 'Sales' },
-    { id: 6, name: 'Support' }
-  ];
+  // const teams = [
+  //   { id: 1, name: 'Design Team' },
+  //   { id: 2, name: 'Engineering' },
+  //   { id: 3, name: 'Marketing' },
+  //   { id: 4, name: 'Product' },
+  //   { id: 5, name: 'Sales' },
+  //   { id: 6, name: 'Support' }
+  // ];
+   const [teams, setTeams] = useState([]);
+  
+    const fetchMyTeams = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          throw new Error("No token found, please login again.");
+        }
+  
+        const res = await fetch("http://localhost:8080/api/teams/my-teams", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+  
+        if (!res.ok) {
+          throw new Error(`Error: ${res.status}`);
+        }
+  
+        const data = await res.json();
+        console.log("Raw My Teams:", data);
+  
+        // ✅ Map backend keys to frontend shape
+        const mappedTeams = data.map((team) => ({
+          id: team.id,
+          name: team.teamName,
+          description: team.description || "No description provided",
+          color:
+            team.teamColor || "bg-gradient-to-br from-blue-500 to-purple-500",
+          members: team.members || [],
+          memberCount: team.members ? team.members.length : 0,
+          projectCount: team.projectCount || 0, // if backend doesn’t send this, default 0
+          role: team.role || "Member",
+          isStarred: team.isStarred || false,
+          createdBy: team.createdBy || "Unknown",
+        }));
+  
+        setTeams(mappedTeams);
+      } catch (error) {
+        console.error("Failed to fetch teams:", error);
+      }
+    };
+  
+    useEffect(() => {
+      fetchMyTeams();
+    }, []);
 
-  const projects = [
-    {
-      id: 1,
-      name: 'Website Redesign',
-      description: 'Complete overhaul of the company website with modern design',
-      team: 'Design Team',
-      status: 'In Progress',
-      priority: 'High',
-      progress: 85,
-      dueDate: '2024-08-15',
-      createdDate: '2024-07-01',
-      members: [
-        { name: 'Alice', avatar: '/avatars/alice.png' },
-        { name: 'Bob', avatar: '/avatars/bob.png' },
-        { name: 'Carol', avatar: '/avatars/carol.png' }
-      ],
-      isStarred: true,
-      color: 'bg-gradient-to-br from-purple-500 to-pink-500',
-      tasks: { total: 24, completed: 20 }
-    },
-    {
-      id: 2,
-      name: 'Mobile App Development',
-      description: 'Native mobile app for iOS and Android platforms',
-      team: 'Engineering',
-      status: 'In Progress',
-      priority: 'High',
-      progress: 62,
-      dueDate: '2024-09-30',
-      createdDate: '2024-06-15',
-      members: [
-        { name: 'David', avatar: '/avatars/david.png' },
-        { name: 'Eve', avatar: '/avatars/eve.png' },
-        { name: 'Frank', avatar: '/avatars/frank.png' }
-      ],
-      isStarred: false,
-      color: 'bg-gradient-to-br from-blue-500 to-cyan-500',
-      tasks: { total: 45, completed: 28 }
-    },
-    {
-      id: 3,
-      name: 'Marketing Campaign Q4',
-      description: 'Comprehensive marketing strategy for Q4 product launch',
-      team: 'Marketing',
-      status: 'Planning',
-      priority: 'Medium',
-      progress: 25,
-      dueDate: '2024-10-01',
-      createdDate: '2024-07-20',
-      members: [
-        { name: 'Grace', avatar: '/avatars/grace.png' },
-        { name: 'Henry', avatar: '/avatars/henry.png' }
-      ],
-      isStarred: true,
-      color: 'bg-gradient-to-br from-orange-500 to-red-500',
-      tasks: { total: 18, completed: 4 }
-    },
-    {
-      id: 4,
-      name: 'API Documentation',
-      description: 'Complete API documentation with examples and guides',
-      team: 'Engineering',
-      status: 'Completed',
-      priority: 'Low',
-      progress: 100,
-      dueDate: '2024-07-30',
-      createdDate: '2024-07-01',
-      members: [
-        { name: 'Ivy', avatar: '/avatars/ivy.png' },
-        { name: 'Jack', avatar: '/avatars/jack.png' }
-      ],
-      isStarred: false,
-      color: 'bg-gradient-to-br from-green-500 to-emerald-500',
-      tasks: { total: 12, completed: 12 }
-    },
-    {
-      id: 5,
-      name: 'Customer Support Portal',
-      description: 'Self-service portal for customer support and knowledge base',
-      team: 'Support',
-      status: 'On Hold',
-      priority: 'Medium',
-      progress: 40,
-      dueDate: '2024-11-15',
-      createdDate: '2024-06-01',
-      members: [
-        { name: 'Kate', avatar: '/avatars/kate.png' },
-        { name: 'Liam', avatar: '/avatars/liam.png' },
-        { name: 'Mia', avatar: '/avatars/mia.png' }
-      ],
-      isStarred: false,
-      color: 'bg-gradient-to-br from-teal-500 to-blue-500',
-      tasks: { total: 30, completed: 12 }
-    },
-    {
-      id: 6,
-      name: 'Data Analytics Dashboard',
-      description: 'Real-time analytics dashboard for business intelligence',
-      team: 'Product',
-      status: 'In Progress',
-      priority: 'High',
-      progress: 75,
-      dueDate: '2024-08-30',
-      createdDate: '2024-06-10',
-      members: [
-        { name: 'Noah', avatar: '/avatars/noah.png' },
-        { name: 'Olivia', avatar: '/avatars/olivia.png' }
-      ],
-      isStarred: true,
-      color: 'bg-gradient-to-br from-indigo-500 to-purple-500',
-      tasks: { total: 36, completed: 27 }
+    const [projects, setProjects] = useState([]);
+  // const projects = [
+  //   {
+  //     id: 1,
+  //     name: 'Website Redesign',
+  //     description: 'Complete overhaul of the company website with modern design',
+  //     team: 'Design Team',
+  //     status: 'In Progress',
+  //     priority: 'High',
+  //     progress: 85,
+  //     dueDate: '2024-08-15',
+  //     createdDate: '2024-07-01',
+  //     members: [
+  //       { name: 'Alice', avatar: '/avatars/alice.png' },
+  //       { name: 'Bob', avatar: '/avatars/bob.png' },
+  //       { name: 'Carol', avatar: '/avatars/carol.png' }
+  //     ],
+  //     isStarred: true,
+  //     color: 'bg-gradient-to-br from-purple-500 to-pink-500',
+  //     tasks: { total: 24, completed: 20 }
+  //   },
+  //   {
+  //     id: 2,
+  //     name: 'Mobile App Development',
+  //     description: 'Native mobile app for iOS and Android platforms',
+  //     team: 'Engineering',
+  //     status: 'In Progress',
+  //     priority: 'High',
+  //     progress: 62,
+  //     dueDate: '2024-09-30',
+  //     createdDate: '2024-06-15',
+  //     members: [
+  //       { name: 'David', avatar: '/avatars/david.png' },
+  //       { name: 'Eve', avatar: '/avatars/eve.png' },
+  //       { name: 'Frank', avatar: '/avatars/frank.png' }
+  //     ],
+  //     isStarred: false,
+  //     color: 'bg-gradient-to-br from-blue-500 to-cyan-500',
+  //     tasks: { total: 45, completed: 28 }
+  //   },
+  //   {
+  //     id: 3,
+  //     name: 'Marketing Campaign Q4',
+  //     description: 'Comprehensive marketing strategy for Q4 product launch',
+  //     team: 'Marketing',
+  //     status: 'Planning',
+  //     priority: 'Medium',
+  //     progress: 25,
+  //     dueDate: '2024-10-01',
+  //     createdDate: '2024-07-20',
+  //     members: [
+  //       { name: 'Grace', avatar: '/avatars/grace.png' },
+  //       { name: 'Henry', avatar: '/avatars/henry.png' }
+  //     ],
+  //     isStarred: true,
+  //     color: 'bg-gradient-to-br from-orange-500 to-red-500',
+  //     tasks: { total: 18, completed: 4 }
+  //   },
+  //   {
+  //     id: 4,
+  //     name: 'API Documentation',
+  //     description: 'Complete API documentation with examples and guides',
+  //     team: 'Engineering',
+  //     status: 'Completed',
+  //     priority: 'Low',
+  //     progress: 100,
+  //     dueDate: '2024-07-30',
+  //     createdDate: '2024-07-01',
+  //     members: [
+  //       { name: 'Ivy', avatar: '/avatars/ivy.png' },
+  //       { name: 'Jack', avatar: '/avatars/jack.png' }
+  //     ],
+  //     isStarred: false,
+  //     color: 'bg-gradient-to-br from-green-500 to-emerald-500',
+  //     tasks: { total: 12, completed: 12 }
+  //   },
+  //   {
+  //     id: 5,
+  //     name: 'Customer Support Portal',
+  //     description: 'Self-service portal for customer support and knowledge base',
+  //     team: 'Support',
+  //     status: 'On Hold',
+  //     priority: 'Medium',
+  //     progress: 40,
+  //     dueDate: '2024-11-15',
+  //     createdDate: '2024-06-01',
+  //     members: [
+  //       { name: 'Kate', avatar: '/avatars/kate.png' },
+  //       { name: 'Liam', avatar: '/avatars/liam.png' },
+  //       { name: 'Mia', avatar: '/avatars/mia.png' }
+  //     ],
+  //     isStarred: false,
+  //     color: 'bg-gradient-to-br from-teal-500 to-blue-500',
+  //     tasks: { total: 30, completed: 12 }
+  //   },
+  //   {
+  //     id: 6,
+  //     name: 'Data Analytics Dashboard',
+  //     description: 'Real-time analytics dashboard for business intelligence',
+  //     team: 'Product',
+  //     status: 'In Progress',
+  //     priority: 'High',
+  //     progress: 75,
+  //     dueDate: '2024-08-30',
+  //     createdDate: '2024-06-10',
+  //     members: [
+  //       { name: 'Noah', avatar: '/avatars/noah.png' },
+  //       { name: 'Olivia', avatar: '/avatars/olivia.png' }
+  //     ],
+  //     isStarred: true,
+  //     color: 'bg-gradient-to-br from-indigo-500 to-purple-500',
+  //     tasks: { total: 36, completed: 27 }
+  //   }
+  // ];
+  //api req for all projects
+const fetchProjects = async () => {
+  const token = localStorage.getItem("token");
+  if (!token) {
+    toast.error("You must be logged in to view projects");
+    return;
+  }
+
+  try {
+    const response = await fetch("http://localhost:8080/api/projects/my-projects", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Failed to fetch projects");
     }
-  ];
+
+    const data = await response.json();
+    console.log("Fetched projects (raw):", data);
+
+    // 🔄 normalize backend → frontend
+    const mappedProjects = data.map((p) => ({
+      id: p.id,
+      projectName: p.projectName,
+      description: p.description || "No description provided",
+      team: p.team?.teamName || "Unknown Team",
+      color: p.team?.teamColor || "bg-gradient-to-br from-blue-500 to-purple-500",
+      status: "Planning", // 🔧 backend doesn’t send status → fallback
+      priority: p.priority
+        ? p.priority.charAt(0) + p.priority.slice(1).toLowerCase()
+        : "Medium", // HIGH → High
+      progress: 0, // 🔧 placeholder until you have tasks tracking
+      dueDate: p.endDate,
+      members: (p.team?.members || []).map((m) => ({
+        name: m.split("@")[0], // take prefix before @ as "name"
+        email: m,
+      })),
+      isStarred: false,
+    }));
+
+    setProjects(mappedProjects);
+  } catch (err) {
+    console.error(err);
+    toast.error(err.message || "Something went wrong while fetching projects");
+  }
+};
+
+  useEffect(() => {
+    fetchProjects();
+  }, []);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -211,7 +315,7 @@ const Projects = () => {
     
     if (searchTerm) {
       filtered = filtered.filter(project =>
-        project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        project.projectName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         project.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
         project.team.toLowerCase().includes(searchTerm.toLowerCase())
       );
@@ -228,29 +332,66 @@ const Projects = () => {
     }
   };
 
-  const handleCreateProject = () => {
-    if (!newProjectName.trim()) {
-      toast.error('Please enter a project name');
-      return;
-    }
-    if (!selectedTeam) {
-      toast.error('Please select a team');
-      return;
-    }
-    if (!priority) {
-      toast.error('Please select a priority level');
+const handleCreateProject = async () => {
+  if (!newProjectName.trim()) {
+    toast.error("Please enter a project name");
+    return;
+  }
+  if (!selectedTeam) {
+    toast.error("Please select a team");
+    return;
+  }
+  if (!priority) {
+    toast.error("Please select a priority level");
+    return;
+  }
+
+  try {
+    const token = localStorage.getItem("token"); // your JWT
+    if (!token) {
+      toast.error("You must be logged in to create a project");
       return;
     }
 
+    const response = await fetch(`http://localhost:8080/api/projects/${selectedTeam}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        projectName: newProjectName,
+        description: newProjectDescription,
+        teamId: selectedTeam, // required by backend
+        priority: priority.toUpperCase(), // backend expects "HIGH"/"MEDIUM"/"LOW"
+        startDate,
+        endDate,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Failed to create project");
+    }
+
+    const data = await response.json();
+    console.log("Project created:", data);
+
     toast.success(`Project "${newProjectName}" created successfully!`);
-    setNewProjectName('');
-    setNewProjectDescription('');
-    setSelectedTeam('');
-    setStartDate('');
-    setEndDate('');
-    setPriority('');
+    setNewProjectName("");
+    setNewProjectDescription("");
+    setSelectedTeam("");
+    setStartDate("");
+    setEndDate("");
+    setPriority("");
     setIsCreateDialogOpen(false);
-  };
+
+  } catch (err) {
+    console.error(err);
+    toast.error(err.message || "Something went wrong while creating project");
+  }
+};
+
 
   const getDaysUntilDue = (dueDate: string) => {
     const today = new Date();
@@ -328,7 +469,7 @@ const Projects = () => {
                       </SelectTrigger>
                       <SelectContent>
                         {teams.map((team) => (
-                          <SelectItem key={team.id} value={team.name}>
+                          <SelectItem key={team.id} value={team.id}>
                             {team.name}
                           </SelectItem>
                         ))}
@@ -433,11 +574,11 @@ const Projects = () => {
                     <div className="flex items-start justify-between">
                       <div className="flex items-center space-x-3">
                         <div className={`w-12 h-12 rounded-lg ${project.color} flex items-center justify-center text-white font-bold text-lg`}>
-                          {project.name.charAt(0)}
+                          {project.projectName[0]}
                         </div>
                         <div className="flex-1 min-w-0">
                           <CardTitle className="text-lg font-poppins font-semibold group-hover:gradient-text transition-all duration-300 truncate">
-                            {project.name}
+                            {project.projectName}
                           </CardTitle>
                           <p className="text-sm text-gray-600">{project.team}</p>
                         </div>
@@ -488,20 +629,20 @@ const Projects = () => {
                       </Badge>
                     </div>
                     
-                    <div className="space-y-2">
+                    {/* <div className="space-y-2">
                       <div className="flex items-center justify-between text-sm text-gray-600">
                         <span>Progress</span>
                         <span>{project.progress}%</span>
                       </div>
                       <Progress value={project.progress} className="h-2" />
-                    </div>
+                    </div> */}
                     
                     <div className="flex items-center justify-between text-sm text-gray-500">
                       <span className="flex items-center">
                         <Calendar className="h-4 w-4 mr-1" />
                         {getDaysUntilDue(project.dueDate)} days left
                       </span>
-                      <span>{project.tasks.completed}/{project.tasks.total} tasks</span>
+                      {/* <span>{project.tasks.completed}/{project.tasks.total} tasks</span> */}
                     </div>
                     
                     <div className="flex items-center justify-between">
@@ -509,7 +650,7 @@ const Projects = () => {
                         {project.members.slice(0, 3).map((member, idx) => (
                           <Avatar key={idx} className="h-8 w-8 border-2 border-white">
                             <AvatarFallback className="bg-gradient-primary text-white text-xs">
-                              {member.name.slice(0, 2)}
+                              {member.name.slice(0, 1)}
                             </AvatarFallback>
                           </Avatar>
                         ))}

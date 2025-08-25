@@ -16,26 +16,44 @@ const Login = () => {
   });
   const navigate = useNavigate();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setIsLoading(true);
 
-    // Simulate API call
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      if (formData.email && formData.password) {
-        toast.success('Welcome back to TeamSphere!');
-        navigate('/dashboard');
-      } else {
-        toast.error('Please fill in all fields');
-      }
-    } catch (error) {
-      toast.error('Something went wrong. Please try again.');
-    } finally {
-      setIsLoading(false);
+  try {
+    if (!formData.email || !formData.password) {
+      toast.error('Please enter both email and password');
+      return;
     }
-  };
+
+    const response = await fetch(`http://localhost:8080/api/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: formData.email,
+        password: formData.password,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Login failed');
+    }
+
+    const data = await response.json();
+
+    // 🔑 Save JWT to localStorage
+    localStorage.setItem('token', data.token);
+
+    toast.success('Welcome back to TeamSphere!');
+    navigate('/dashboard');
+  } catch (error) {
+    toast.error(error.message || 'Something went wrong. Please try again.');
+  } finally {
+    setIsLoading(false);
+  }
+};
+
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
