@@ -26,7 +26,7 @@ const handleSubmit = async (e: React.FormEvent) => {
       return;
     }
 
-    const response = await fetch(`http://localhost:8080/api/auth/login`, {
+    const response = await fetch(`https://teamsphere-springboot.onrender.com/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -177,7 +177,7 @@ const handleSubmit = async (e: React.FormEvent) => {
           </form>
 
           {/* Social Login */}
-          <div className="relative">
+          {/* <div className="relative">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-gray-300"></div>
             </div>
@@ -202,7 +202,7 @@ const handleSubmit = async (e: React.FormEvent) => {
               </svg>
               Facebook
             </Button>
-          </div>
+          </div> */}
 
           {/* Sign Up Link */}
           <div className="text-center">

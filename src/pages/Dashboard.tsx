@@ -24,10 +24,10 @@ const Dashboard = () => {
   const fetchData = async () => {
     try {
       const [teamsRes, projectsRes] = await Promise.all([
-        fetch("http://localhost:8080/api/teams/my-teams", {
+        fetch("https://teamsphere-springboot.onrender.com/api/teams/my-teams", {
           headers: { Authorization: `Bearer ${token}` },
         }),
-        fetch("http://localhost:8080/api/projects/my-projects", {
+        fetch("https://teamsphere-springboot.onrender.com/api/projects/my-projects", {
           headers: { Authorization: `Bearer ${token}` },
         }),
       ]);

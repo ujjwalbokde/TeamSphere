@@ -53,7 +53,7 @@ const TeamDetail = () => {
     const fetchTeam = async () => {
       try {
         const token = localStorage.getItem("token");
-        const res = await fetch(`http://localhost:8080/api/teams/${teamId}`, {
+        const res = await fetch(`https://teamsphere-springboot.onrender.com/api/teams/${teamId}`, {
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
@@ -98,7 +98,7 @@ const TeamDetail = () => {
     try {
       const token = localStorage.getItem("token");
       const res = await fetch(
-        `http://localhost:8080/api/teams/${teamId}/leave`,
+        `https://teamsphere-springboot.onrender.com/api/teams/${teamId}/leave`,
         {
           method: "POST",
           headers: { Authorization: `Bearer ${token}` },
@@ -142,7 +142,7 @@ const TeamDetail = () => {
     try {
       const token = localStorage.getItem("token");
       const res = await fetch(
-        `http://localhost:8080/api/teams/${teamId}/invite`,
+        `https://teamsphere-springboot.onrender.com/api/teams/${teamId}/invite`,
         {
           method: "POST",
           headers: {

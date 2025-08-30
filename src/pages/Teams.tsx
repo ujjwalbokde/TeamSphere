@@ -58,7 +58,7 @@ const Teams = () => {
         throw new Error("No token found, please login again.");
       }
 
-      const res = await fetch("http://localhost:8080/api/teams/my-teams", {
+      const res = await fetch("https://teamsphere-springboot.onrender.com/api/teams/my-teams", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -126,7 +126,7 @@ const Teams = () => {
         members: inviteEmails, // array of emails
       };
 
-      const response = await fetch("http://localhost:8080/api/teams", {
+      const response = await fetch("https://teamsphere-springboot.onrender.com/api/teams", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -176,7 +176,7 @@ const Teams = () => {
         return;
       }
 
-      const res = await fetch('http://localhost:8080/user/me', {
+      const res = await fetch('https://teamsphere-springboot.onrender.com/user/me', {
           method: "GET",
           headers: {
             "Content-Type": "application/json",

@@ -32,7 +32,7 @@ const Settings = () => {
     const fetchUser = async () => {
       try {
         const token = localStorage.getItem('token'); // or sessionStorage
-        const res = await fetch('http://localhost:8080/user/me', {
+        const res = await fetch('https://teamsphere-springboot.onrender.com/user/me', {
           method: "GET",
           headers: {
             "Content-Type": "application/json",

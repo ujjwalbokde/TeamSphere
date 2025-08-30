@@ -89,7 +89,7 @@ const ProjectBoard = () => {
       return;
     }
 
-    const res = await fetch(`http://localhost:8080/api/projects/${projectId}`, {
+    const res = await fetch(`https://teamsphere-springboot.onrender.com/api/projects/${projectId}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -131,7 +131,7 @@ const ProjectBoard = () => {
   const fetchTasks = async () => {
     const token = localStorage.getItem("token");
     const res = await fetch(
-      `http://localhost:8080/api/projects/${projectId}/tasks`,
+      `https://teamsphere-springboot.onrender.com/api/projects/${projectId}/tasks`,
       {
         headers: {
           "Content-Type": "application/json",
@@ -206,7 +206,7 @@ const ProjectBoard = () => {
 
     const token = localStorage.getItem("token");
     const res = await fetch(
-      `http://localhost:8080/api/projects/${projectId}/tasks`,
+      `https://teamsphere-springboot.onrender.com/api/projects/${projectId}/tasks`,
       {
         method: "POST",
         headers: {
@@ -257,7 +257,7 @@ const ProjectBoard = () => {
   const handleDeleteTask = async (taskId: number) => {
     const token = localStorage.getItem("token");
     const res = await fetch(
-      `http://localhost:8080/api/projects/${projectId}/tasks/${taskId}`,
+      `https://teamsphere-springboot.onrender.com/api/projects/${projectId}/tasks/${taskId}`,
       {
         method: "DELETE",
         headers: {
@@ -285,7 +285,7 @@ const ProjectBoard = () => {
       task.status === "completed" ? "in-progress" : "completed";
 
     const res = await fetch(
-      `http://localhost:8080/api/projects/${projectId}/tasks/${taskId}`,
+      `https://teamsphere-springboot.onrender.com/api/projects/${projectId}/tasks/${taskId}`,
       {
         method: "PUT",  
         headers: {

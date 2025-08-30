@@ -65,8 +65,8 @@ const Projects = () => {
         if (!token) {
           throw new Error("No token found, please login again.");
         }
-  
-        const res = await fetch("http://localhost:8080/api/teams/my-teams", {
+
+        const res = await fetch("https://teamsphere-springboot.onrender.com/api/teams/my-teams", {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -229,7 +229,7 @@ const fetchProjects = async () => {
   }
 
   try {
-    const response = await fetch("http://localhost:8080/api/projects/my-projects", {
+    const response = await fetch("https://teamsphere-springboot.onrender.com/api/projects/my-projects", {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -353,7 +353,7 @@ const handleCreateProject = async () => {
       return;
     }
 
-    const response = await fetch(`http://localhost:8080/api/projects/${selectedTeam}`, {
+    const response = await fetch(`https://teamsphere-springboot.onrender.com/api/projects/${selectedTeam}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
